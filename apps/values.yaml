@@ -2,5 +2,8 @@ spec:
   destination:
     server: https://kubernetes.default.svc
   source:
-    repoURL: https://github.com/argoproj/argocd-example-apps
+    repoURL: git@github.com:hishamshaikha/argocd-example-apps
     targetRevision: HEAD
+
+labels:
+  test: working
