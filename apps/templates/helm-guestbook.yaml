@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
-  labels: {{ .Values.labels }}
+  # labels: {{ .Values.labels }}
 spec:
   destination:
     namespace: helm-guestbook
