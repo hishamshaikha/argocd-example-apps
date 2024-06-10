@@ -6,7 +6,9 @@ metadata:
   finalizers:
   - resources-finalizer.argocd.argoproj.io
   labels:
-    hisham: test
+    {{- with .Values.labels }}
+    {{ toYaml . | indent 8 }}
+    {{- end }}
 spec:
   destination:
     namespace: helm-guestbook
