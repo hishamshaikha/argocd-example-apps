@@ -1,20 +1,54 @@
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: helm-guestbook
+#   namespace: argocd
+#   finalizers:
+#   - resources-finalizer.argocd.argoproj.io
+#   labels:
+#     {{- with .Values.labels }}
+#     {{ toYaml . | indent 8 }}
+#     {{- end }}
+# spec:
+#   destination:
+#     namespace: helm-guestbook
+#     server: {{ .Values.spec.destination.server }}
+#   project: default
+#   source:
+#     path: helm-guestbook
+#     repoURL: {{ .Values.spec.source.repoURL }}
+#     targetRevision: {{ .Values.spec.source.targetRevision }}
+
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: helm-guestbook
+  name: cluster-addons
   namespace: argocd
-  finalizers:
-  - resources-finalizer.argocd.argoproj.io
-  labels:
-    {{- with .Values.labels }}
-    {{ toYaml . | indent 8 }}
-    {{- end }}
 spec:
-  destination:
-    namespace: helm-guestbook
-    server: {{ .Values.spec.destination.server }}
-  project: default
-  source:
-    path: helm-guestbook
-    repoURL: {{ .Values.spec.source.repoURL }}
-    targetRevision: {{ .Values.spec.source.targetRevision }}
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - git:
+      repoURL: {{ .Values.spec.source.repoURL }}
+      revision: {{ .Values.spec.source.targetRevision }}
+      directories:
+      - path: charts/*
+  template:
+    metadata:
+      name: {{ .path.basename }}
+    labels:
+      {{- with .Values.labels }}
+      {{ toYaml . | indent 8 }}
+      {{- end }}
+    spec:
+      project: "default"
+      source:
+        repoURL: {{ .Values.spec.source.repoURL }}
+        targetRevision: HEAD
+        path: {{ .path.path }}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: {{ .path.basename }}
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true
